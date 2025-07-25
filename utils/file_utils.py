@@ -1,5 +1,9 @@
-__all__ = ["list_files"]
+__all__ = ["FileUtils"]
 import os
+from rich.console import Console
+from rich.table import Table
+import pandas as pd
+from .helpers import Helper
 
 
 class FileUtils:
@@ -11,11 +15,9 @@ class FileUtils:
         """
         Retrieve all files in the specified folder.
         Returns:
-        list of str: A list containing the names of all files (not directories)
-                     present in the folder specified by folder_path.
+            list of str: Names of all files (excluding directories).
         """
         files = []
-
         for item in os.listdir(self.file_path):
             full_path = os.path.join(self.file_path, item)
             if os.path.isfile(full_path):
@@ -23,43 +25,77 @@ class FileUtils:
         return files
 
     def get_file_count(self):
+        """
+        Count the number of files in the specified folder.
+        """
         return len(self.get_all_files())
 
-    def get_empty_folder(self):
+    def get_empty_folders(self):
+        """
+        Get a list of empty folders within the directory tree.
 
-        for root, folder, file in os.walk(self.file_path):
-            print(file)
+        Returns:
+            list of str: Full paths of empty folders.
+        """
+        empty_folders = []
+        for root, dirs, files in os.walk(self.file_path):
+            if not dirs and not files:
+                empty_folders.append(root)
+        return empty_folders
 
+    def format_and_print_folders(self, folders, title="Empty Folders"):
+        """
+        Display a list of folder paths in a well-formatted table using the 'rich' library.
 
-'''
+        Args:
+            folders (list): List of folder paths to display.
+            title (str): Optional title for the table.
+        """
+        console = Console()
 
+        if not folders:
+            console.print("[bold red]No folders found.[/bold red]")
+            return
 
-def __get_all_files(folder_path):
-  """
-    Retrieve all files in the specified folder.
+        table = Table(title=title)
+        table.add_column("#", style="cyan", justify="right")
+        table.add_column("Folder Path", style="green")
 
-    Args:
-        folder_path (str): The path to the directory to search for files.
+        for i, path in enumerate(folders, 1):
+            table.add_row(str(i), path)
 
-    Returns:
-        list of str: A list containing the names of all files (not directories)
-                     present in the folder specified by folder_path.
-    """
-  files = []
-  for item in os.listdir(folder_path):
-    full_path = os.path.join(folder_path, item)
-    if os.path.isfile(full_path):
-      files.append(item)
-  return files
+        console.print(table)
 
+    def __get_paginated_data(self, data, offset: int = 0, limit: int = 10000):
+        df = pd.DataFrame([{"path": d} for d in data])
+        paginated_df = df.iloc[offset:offset + limit]
 
-def list_files(folder_path):
-  # Public function that wraps the private one
-  return __get_all_files(folder_path)
+        return paginated_df["path"].tolist()
 
+    def __get_all_dirs(self, offset=0, limit=10):
+        dirs = []
+        for root, subdirs, files in os.walk(self.file_path):
+            for subdir in subdirs:
+                full_path = os.path.join(root, subdir)
+                if os.path.isdir(
+                        full_path):  # optional, since subdirs are from os.walk
+                    dirs.append(full_path)
 
-def count_files(folder_path):
-  return len(__get_all_files(folder_path))
+        # df = pd.DataFrame([{"path": d} for d in dirs])
+        # # df.reset_index(drop=True, inplace=True)
 
+        # # Apply offset and limit
+        # paginated_df = df.iloc[offset:offset + limit]
 
-  '''
+        return dirs  # paginated_df['path'].tolist()
+
+    def get_dir_with_size(self, offset=0, limit=10):
+        all_dirs = self.__get_all_dirs()
+        dir_list = self.__get_paginated_data(all_dirs, offset, limit)
+
+        dict = []
+        for dir in dir_list:
+            size = os.path.getsize(dir)
+            dict.append({"path": dir, "size": Helper.bytes_to_readable(size)})
+
+        return dict
