@@ -1,14 +1,18 @@
-import utils
+from utils import FileUtils, Helper
+
 import os
-import utils
 
-script_dir = os.path.dirname(os.path.realpath(__file__))
+current_path = "/mnt/c/Users/Satish/"
+script_dir = os.path.dirname(current_path)
 
-files = utils.FileUtils(file_path=script_dir)
-empty_files = files.get_empty_folders()
-result = files.get_dir_with_size()
-sorted_list = utils.helpers.Helper.sort_by_column(result,
-                                                  "size",
-                                                  ascending=False)
+files = FileUtils(file_path=script_dir)
 
-print(utils.helpers.Helper.format(sorted_list))
+for i in range(0, 5):
+
+    empty_files = files.get_empty_folders(verbose=True, exclude=["php projects"])
+    if len(empty_files) == 0:
+        break
+
+    # result = files.get_dir_with_size()
+    # sorted_list = Helper.sort_by_column(result, "size", ascending=False)
+    files.remove_dir(empty_files, ask_confirm=False)
