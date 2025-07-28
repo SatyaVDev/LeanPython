@@ -1,5 +1,3 @@
-build==1.2.2.post1
--e git+https://github.com/SatyaVDev/LeanPython@a9f6bb954abdd9fb44502ed824a524760f4fef28#egg=fire_file_mangement
 markdown-it-py==3.0.0
 mdurl==0.1.2
 numpy==2.3.2
