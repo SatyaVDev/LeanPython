@@ -155,3 +155,59 @@ class FileUtils:
             print("✅ Done cleaning directories.")
         else:
             print("❌ Operation cancelled by user.")
+
+    def create_dir(self, path, verbose=False):
+        """
+        Check if a folder exists, and create it if it doesn't.
+
+        Args:
+            path (str): The folder path to check or create.
+            verbose (bool): Whether to print status messages.
+
+        Returns:
+            bool: True if folder exists or was created successfully, False if an error occurred.
+        """
+        if not os.path.isdir(path):
+            try:
+                os.makedirs(path)
+                if verbose:
+                    print(f"Created folder: {path}")
+            except Exception as e:
+                if verbose:
+                    print(f"Error creating folder '{path}': {e}")
+                return False
+        else:
+            if verbose:
+                print(f"Folder already exists: {path}")
+        return True
+
+    def move_files_by_extension(self):
+        list_of_files = self.get_all_files()
+        moved_files = []  # to store info about moved files
+
+        for file in list_of_files:
+            full_path_file = os.path.join(self.file_path, file)
+
+            # Skip directories
+            if os.path.isdir(full_path_file):
+                continue
+
+            # Extract extension and handle no-extension case
+            _, extension = os.path.splitext(full_path_file)
+            folder_name = extension[1:].upper() or "NO_EXTENSION"
+
+            # Destination folder path
+            dest_folder = os.path.join(self.file_path, folder_name)
+            self.create_dir(dest_folder, verbose=True)
+
+            # Full destination path
+            destination = os.path.join(dest_folder, os.path.basename(file))
+
+            # Move file and record the move
+            shutil.move(full_path_file, destination)
+            moved_files.append((file, os.path.relpath(destination, self.file_path)))
+
+        # Print summary
+        print("\n📦 Moved Files:")
+        for original, new_location in moved_files:
+            print(f"  {original} → {new_location}")
