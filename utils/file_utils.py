@@ -90,7 +90,7 @@ class FileUtils:
 
     def __get_paginated_data(self, data, offset: int = 0, limit: int = 10000):
         df = pd.DataFrame([{"path": d} for d in data])
-        paginated_df = df.iloc[offset : offset + limit]
+        paginated_df = df.iloc[offset:offset + limit]
 
         return paginated_df["path"].tolist()
 
@@ -99,7 +99,8 @@ class FileUtils:
         for root, subdirs, files in os.walk(self.file_path):
             for subdir in subdirs:
                 full_path = os.path.join(root, subdir)
-                if os.path.isdir(full_path):  # optional, since subdirs are from os.walk
+                if os.path.isdir(
+                        full_path):  # optional, since subdirs are from os.walk
                     dirs.append(full_path)
 
         # df = pd.DataFrame([{"path": d} for d in dirs])
@@ -135,9 +136,7 @@ class FileUtils:
         # Ask for confirmation
         confirm = (
             input("Are you sure you want to delete the above folders? (Y/N): ")
-            if ask_confirm
-            else "y"
-        )
+            if ask_confirm else "y")
 
         if confirm.lower() == "y":
             for folder in folder_list:
@@ -182,6 +181,16 @@ class FileUtils:
         return True
 
     def move_files_by_extension(self):
+        """
+        Move files into folders based on thei
+        r file extensions.
+
+        - Scans all files in the specified base path (`self.file_path`)
+        - For each file, determines its extension (e.g., .txt, .pdf)
+        - Creates a folder named after the extension (e.g., TXT, PDF)
+        - Moves the file into its corresponding folder
+        - Files without an extension go to the NO_EXTENSION folder
+        """
         list_of_files = self.get_all_files()
         moved_files = []  # to store info about moved files
 
@@ -205,7 +214,8 @@ class FileUtils:
 
             # Move file and record the move
             shutil.move(full_path_file, destination)
-            moved_files.append((file, os.path.relpath(destination, self.file_path)))
+            moved_files.append(
+                (file, os.path.relpath(destination, self.file_path)))
 
         # Print summary
         print("\n📦 Moved Files:")
