@@ -84,7 +84,7 @@ class CoffeeMachine:
 
                     if self.is_resource_sufficient(
                             drink_details) and money_machine.make_payment(
-                                drink_details.cost):
+                        drink_details.cost):
                         self.make_coffee(drink_details)
             except ValueError as error:
                 print(error)
